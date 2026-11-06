@@ -74,3 +74,7 @@ dotnet build -c Release -p:Package=true # → dist/Oddhatter-Gatling-<version>.z
 ```
 
 Bump the version in three places: `MachineArbalest.csproj` `<Version>`, `manifest.json`, and `MachineArbalestPlugin.Version`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
