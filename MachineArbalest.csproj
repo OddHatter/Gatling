@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>Gatling</AssemblyName>
+    <RootNamespace>Oddhatter.MachineArbalest</RootNamespace>
+    <Version>2.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <DebugType>embedded</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- Override on the command line: dotnet build -p:ValheimDir=... -p:ProfileDir=... -->
+    <ValheimDir Condition="'$(ValheimDir)' == ''">/mnt/c/Program Files (x86)/Steam/steamapps/common/Valheim</ValheimDir>
+    <ProfileDir Condition="'$(ProfileDir)' == ''">/mnt/c/Users/aaron/AppData/Roaming/r2modmanPlus-local/Valheim/profiles/Valheim</ProfileDir>
+    <ManagedDir>$(ValheimDir)/valheim_Data/Managed</ManagedDir>
+    <BepInExCore>$(ProfileDir)/BepInEx/core</BepInExCore>
+    <PluginDeployDir>$(ProfileDir)/BepInEx/plugins/Oddhatter-Gatling</PluginDeployDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <!-- Publicizes assembly_valheim at compile time so private game members are checked by the compiler, not by string lookups. -->
+    <PackageReference Include="Krafs.Publicizer" Version="2.2.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Publicize Include="assembly_valheim" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="assembly_valheim"><HintPath>$(ManagedDir)/assembly_valheim.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="assembly_utils"><HintPath>$(ManagedDir)/assembly_utils.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(ManagedDir)/UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.PhysicsModule"><HintPath>$(ManagedDir)/UnityEngine.PhysicsModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx"><HintPath>$(BepInExCore)/BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(BepInExCore)/0Harmony.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <!-- dotnet build -p:Deploy=true  → copies the plugin into the r2modman profile. -->
+  <Target Name="DeployToProfile" AfterTargets="Build" Condition="'$(Deploy)' == 'true'">
+    <MakeDir Directories="$(PluginDeployDir)" />
+    <Copy SourceFiles="$(TargetPath);manifest.json;README.md" DestinationFolder="$(PluginDeployDir)" />
+    <Message Importance="high" Text="Deployed to $(PluginDeployDir)" />
+  </Target>
+
+  <!-- dotnet build -c Release -p:Package=true  → Thunderstore-style zip for r2modman "Import local mod". -->
+  <Target Name="PackageZip" AfterTargets="Build" Condition="'$(Package)' == 'true'">
+    <PropertyGroup>
+      <PackageStage>$(MSBuildProjectDirectory)/obj/package</PackageStage>
+      <PackageZipPath>$(MSBuildProjectDirectory)/dist/Oddhatter-Gatling-$(Version).zip</PackageZipPath>
+    </PropertyGroup>
+    <RemoveDir Directories="$(PackageStage)" />
+    <Copy SourceFiles="manifest.json;README.md;icon.png" DestinationFolder="$(PackageStage)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackageStage)/plugins" />
+    <MakeDir Directories="$(MSBuildProjectDirectory)/dist" />
+    <ZipDirectory SourceDirectory="$(PackageStage)" DestinationFile="$(PackageZipPath)" Overwrite="true" />
+    <Message Importance="high" Text="Packaged $(PackageZipPath)" />
+  </Target>
+
+</Project>

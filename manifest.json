@@ -1,0 +1,9 @@
+{
+  "name": "Gatling",
+  "version_number": "2.0.0",
+  "website_url": "",
+  "description": "Hold primary attack to fire crossbows, bows and elemental staffs (Dundr etc.) automatically through the vanilla attack pipeline. Per-type toggles and fire rates; configurable stamina, eitr, damage, recoil, durability. Live config reload.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2360"
+  ]
+}
